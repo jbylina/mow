@@ -1,0 +1,24 @@
+\documentclass{article}
+
+
+\title{Sweave Example 1}
+
+\begin{document}
+\maketitle
+
+\SweaveOpts{concordance=TRUE}
+
+<<>>=
+print.noquote("test");
+print.noquote("lol")
+@
+
+
+<<fig = T, echo = F>>=
+ library(ggplot2)
+ x=rnorm(100)
+ p <- qplot(x)
+ print(p)
+@
+
+\end{document}
