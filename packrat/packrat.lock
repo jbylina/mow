@@ -8,10 +8,21 @@ Source: CRAN
 Version: 1.60.0-2
 Hash: be2967bcff307e561d9ba17faf03205c
 
+Package: C50
+Source: CRAN
+Version: 0.1.0-24
+Hash: c850972ec5a74116e0c02898b501b42d
+Requires: partykit
+
 Package: DBI
 Source: CRAN
 Version: 0.4-1
 Hash: 6524d5c5d30ff74084ac028eeb19eb1b
+
+Package: MASS
+Source: CRAN
+Version: 7.3-45
+Hash: 0650d5701aa7e369e77c9e2c8e1dc913
 
 Package: Matrix
 Source: CRAN
@@ -34,6 +45,17 @@ Source: CRAN
 Version: 1.1-2
 Hash: c0d56cd15034f395874c870141870c25
 
+Package: RCurl
+Source: CRAN
+Version: 1.95-4.8
+Hash: 79c7d5a8684e44e0e3426d3093aa7d90
+Requires: bitops
+
+Package: RGtk2
+Source: CRAN
+Version: 2.20.31
+Hash: c73b0fbdee3b6e2d7815b12a1cd6e01f
+
 Package: Rcpp
 Source: CRAN
 Version: 0.12.5
@@ -55,11 +77,16 @@ Source: CRAN
 Version: 0.1
 Hash: 0afb92b59b02593c70ff8046700ba9d3
 
+Package: bitops
+Source: CRAN
+Version: 1.0-6
+Hash: 67d0775189fd0041d95abca618c5c07e
+
 Package: car
 Source: CRAN
 Version: 2.1-2
 Hash: a3a1be19eec9f289555ff01b43be707a
-Requires: pbkrtest, quantreg
+Requires: MASS, pbkrtest, quantreg
 
 Package: caret
 Source: CRAN
@@ -67,10 +94,26 @@ Version: 6.0-68
 Hash: dd5bde39e5d4649f6da763c7edf1a1b2
 Requires: car, foreach, ggplot2, nlme, plyr, reshape2
 
+Package: class
+Source: CRAN
+Version: 7.3-14
+Hash: 98330808284e70f0bce1f8ff419d4032
+Requires: MASS
+
 Package: colorspace
 Source: CRAN
 Version: 1.2-6
 Hash: 00bb12245cd975c450cc4a960884fa15
+
+Package: combinat
+Source: CRAN
+Version: 0.0-8
+Hash: 1ddebf0315ec8a5c255adc4da9143b81
+
+Package: corrplot
+Source: CRAN
+Version: 0.77
+Hash: 09045e00f9a400b954f5f5f64f955f31
 
 Package: dichromat
 Source: CRAN
@@ -88,6 +131,12 @@ Version: 0.4.3
 Hash: e6d3a09516f2018080e4737423aadfa6
 Requires: BH, DBI, R6, Rcpp, assertthat, lazyeval, magrittr
 
+Package: e1071
+Source: CRAN
+Version: 1.6-7
+Hash: a8b909c7e06f7bfcbdbbad439799e25d
+Requires: class
+
 Package: entropy
 Source: CRAN
 Version: 1.2.1
@@ -103,17 +152,34 @@ Package: ggplot2
 Source: CRAN
 Version: 2.1.0
 Hash: 50e297b0191179c39c7dcae0eff72b51
-Requires: digest, gtable, plyr, reshape2, scales
+Requires: MASS, digest, gtable, plyr, reshape2, scales
 
 Package: gtable
 Source: CRAN
 Version: 0.2.0
 Hash: cd78381a9d3fea966ac39bd0daaf5554
 
+Package: h2o
+Source: CRAN
+Version: 3.8.2.6
+Hash: d97770bf7c4d8ce530ca347e62be964c
+Requires: RCurl, jsonlite, statmod
+
 Package: iterators
 Source: CRAN
 Version: 1.0.8
 Hash: 488b93c2a4166db0d15f1e8d882cb1d4
+
+Package: jsonlite
+Source: CRAN
+Version: 0.9.22
+Hash: a465329f66afd33012e1aedfe5ba2e20
+
+Package: klaR
+Source: CRAN
+Version: 0.6-12
+Hash: 1609617f5a5998a2d6317351a4dffe03
+Requires: MASS, combinat
 
 Package: labeling
 Source: CRAN
@@ -129,7 +195,7 @@ Package: lme4
 Source: CRAN
 Version: 1.1-12
 Hash: b1a920ffe472d3e5111ee57dd81402ba
-Requires: Matrix, Rcpp, RcppEigen, minqa, nlme, nloptr
+Requires: MASS, Matrix, Rcpp, RcppEigen, minqa, nlme, nloptr
 
 Package: magrittr
 Source: CRAN
@@ -163,11 +229,16 @@ Source: CRAN
 Version: 0.4.7-1
 Hash: 16ca16d36eb18d1d16113606ecc5c400
 
+Package: partykit
+Source: CRAN
+Version: 1.0-5
+Hash: f4822f83701f4688980c1b849c4b2d40
+
 Package: pbkrtest
 Source: CRAN
 Version: 0.4-6
 Hash: 8117c37e2e3078e3c6465134bac6956e
-Requires: Matrix, lme4
+Requires: MASS, Matrix, lme4
 
 Package: plyr
 Source: CRAN
@@ -186,17 +257,39 @@ Source: CRAN
 Version: 4.6-12
 Hash: b37274857316c7b9431cc7f72aaffb77
 
+Package: rattle
+Source: CRAN
+Version: 4.1.0
+Hash: 567ed1a8eafc661815eb41dee89a3494
+Requires: RGtk2, magrittr, stringi
+
 Package: reshape2
 Source: CRAN
 Version: 1.4.1
 Hash: 4c341beb363831f5320f678f7f1b679d
 Requires: Rcpp, plyr, stringr
 
+Package: rpart
+Source: CRAN
+Version: 4.1-10
+Hash: 1eeecd328c5297c43e9d139944bb0775
+
+Package: rpart.plot
+Source: CRAN
+Version: 2.0.0
+Hash: 1f9f7d27b117f98996119cc6addffc53
+Requires: rpart
+
 Package: scales
 Source: CRAN
 Version: 0.4.0
 Hash: bce90b73946711302c29ceabdb08241c
 Requires: RColorBrewer, Rcpp, dichromat, labeling, munsell, plyr
+
+Package: statmod
+Source: CRAN
+Version: 1.4.24
+Hash: 1aad9bf175b7d9a5c073f633dc635c31
 
 Package: stringi
 Source: CRAN
