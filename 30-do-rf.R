@@ -86,6 +86,6 @@ rf_var_importance <- randomForest(select(data, -Cover_Type),
                                   ntree = rf_fit$bestTune$ntree,
                                   importance = TRUE)
 
-
+save(rf_var_importance, file = "rf_var_importance.Rdata")
 
 

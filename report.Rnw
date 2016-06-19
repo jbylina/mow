@@ -41,6 +41,7 @@
 \newcommand{\C}{\mathbb{C}}
 \newcommand{\Z}{\mathbb{Z}}
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 \title{Projekt MOW - Dokumentacja końcowa}
 \author{Maciej Poćwierz\\
 Piotr Chmielewski\\
@@ -53,33 +54,6 @@ Jacek Bylina
 \section{Szczegółowa interpretacja tematu projektu}
 
 \subsection{Opis danych}
-
-<<echo = F>>=
-require(plyr)
-require(dplyr)
-
-addMissingFactorLevels <- function(col){
-  if(is.factor(col) && length(levels(col)) == 1)
-    return(factor(col, levels = unique(c(levels(col), "Yes", "No"))))
-  return(col)
-}
-
-read.csv(file = 'data/train.csv', header = TRUE) %>% select(-Id) %>%
-  mutate_each(funs(ifelse(.==1, "Yes", "No")), starts_with('Soil_Type')) %>%
-  mutate_each(funs(as.factor), starts_with('Soil_Type')) %>%
-  mutate_each(funs(addMissingFactorLevels), starts_with('Soil_Type')) %>%
-  
-  mutate_each(funs(ifelse(.==1, "Yes", "No")), starts_with('Wilderness')) %>%
-  mutate_each(funs(as.factor), starts_with('Wilderness')) %>%
-  mutate_each(funs(addMissingFactorLevels), starts_with('Wilderness')) %>%
-  
-  mutate(Cover_Type = paste("Cover", Cover_Type, sep = "")) %>%
-  mutate(Cover_Type = as.factor(Cover_Type)) -> data
-@
-
-<<>>=
-summary(data)
-@
 
 \subsection{Naiwny klasyfikator bayesowski}
 
@@ -150,18 +124,14 @@ quality & 83,0\% & 80,0\% & 81,7\% & 80,7\% \\
 \end{tabular}
 \end{center}
 
-\SweaveOpts{concordance=TRUE}
+
 <<>>=
-
-
+load(file = "rf_model.Rdata")
 @
 
-
 <<fig = T, echo = F>>=
- library(ggplot2)
- x=rnorm(100)
- p <- qplot(x)
- print(p)
+
+ 
 @
 
 

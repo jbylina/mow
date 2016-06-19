@@ -57,8 +57,8 @@ data %>% select(-starts_with('Soil_Type'), -starts_with('Wilderness_Area')) %>%
 rm(Soil_Type, Wilderness_Area)
 
 
-e1071_fit_2 <- train(select(train_bayes, -Cover_Type),
-                     train_bayes$Cover_Type,
+e1071_fit_2 <- train(select(data_bayes, -Cover_Type),
+                     data_bayes$Cover_Type,
                      method = e1071_nb,
                      trControl = trControl,
                      tuneGrid = expand.grid(.laplace = 0.5))

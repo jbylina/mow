@@ -16,10 +16,7 @@ vignettes/*.pdf
 data/**
 .Rproj.user
 packrat/lib*/
-
-
 *.pdf
 *.tex
 *.log
-*.pdf
 *.synctex.gz
