@@ -78,4 +78,14 @@ rf_fit <- train(select(data, -Cover_Type),
                 method = rf,
                 trControl = trControl)
 
+save(rf_fit, file = "rf_fit.Rdata")
+
+rf_var_importance <- randomForest(select(data, -Cover_Type),
+                                  data$Cover_Type,
+                                  mtry = rf_fit$bestTune$mtry,
+                                  ntree = rf_fit$bestTune$ntree,
+                                  importance = TRUE)
+
+
+
 

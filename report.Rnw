@@ -52,8 +52,36 @@ Jacek Bylina
 
 \section{Szczegółowa interpretacja tematu projektu}
 
-\subsection{Naiwny klasyfikator bayesowski}
+\subsection{Opis danych}
 
+<<echo = F>>=
+require(plyr)
+require(dplyr)
+
+addMissingFactorLevels <- function(col){
+  if(is.factor(col) && length(levels(col)) == 1)
+    return(factor(col, levels = unique(c(levels(col), "Yes", "No"))))
+  return(col)
+}
+
+read.csv(file = 'data/train.csv', header = TRUE) %>% select(-Id) %>%
+  mutate_each(funs(ifelse(.==1, "Yes", "No")), starts_with('Soil_Type')) %>%
+  mutate_each(funs(as.factor), starts_with('Soil_Type')) %>%
+  mutate_each(funs(addMissingFactorLevels), starts_with('Soil_Type')) %>%
+  
+  mutate_each(funs(ifelse(.==1, "Yes", "No")), starts_with('Wilderness')) %>%
+  mutate_each(funs(as.factor), starts_with('Wilderness')) %>%
+  mutate_each(funs(addMissingFactorLevels), starts_with('Wilderness')) %>%
+  
+  mutate(Cover_Type = paste("Cover", Cover_Type, sep = "")) %>%
+  mutate(Cover_Type = as.factor(Cover_Type)) -> data
+@
+
+<<>>=
+summary(data)
+@
+
+\subsection{Naiwny klasyfikator bayesowski}
 
 Zbiór danych podzielono na zbiór trenujący składający się z  80\% przykładów i testowy złożony z 20\% przykładów. Przy podziale zachowano procentowy rozkład klas przykładów. Wyliczanie prawdopodobieństw a-posteriori w regule Bayesa wymagało przekształcenie wielu atrybutów binarnych opisujących tę samą cechę przykładu na pojedynczy atrybut dyskretny. Zestaw atrybutów binarnych Wilderness\_Area\_*, zamieniono na atrybut dyskretny przyjmujący wartości ze zbioru \{1, 2, 3\}. Podobnie zestaw atrybutów binarnych opisujący typ gleby przekształcono w pojedynczy atrybut o przciwdziedzinie \{1, 2, \ldots{} , 40\}. Naiwny klasyfikator Bayesa estymuje prawdopodobieństwo $P(x_j|C_i)$ dla atrybutów ciągłych funkcją gęstości zgodnie z przyjętym rozkładem wartości atrybutów. W ramach projektu estymowano to prawdopodobieństwo funkcją gęstości Gauss'a oraz Laplace'a otrzymując bardzo zbliżoną skuteczność klasyfikacji. Jakość klasyfikacji na wydzielonym zbiorze testowym wyniosła ok. 66\%. 
 
@@ -124,8 +152,8 @@ quality & 83,0\% & 80,0\% & 81,7\% & 80,7\% \\
 
 \SweaveOpts{concordance=TRUE}
 <<>>=
-print.noquote("test");
-print.noquote("lol")
+
+
 @
 
 
