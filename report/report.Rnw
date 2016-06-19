@@ -1,13 +1,128 @@
-\documentclass{article}
-
-
-\title{Sweave Example 1}
-
+\documentclass[12pt]{article}%
+\usepackage{amsfonts}
+\usepackage{fancyhdr}
+\usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=2.2cm, right=2.2cm]%
+{geometry}
+\usepackage{times}
+\usepackage{amsmath}
+\usepackage{changepage}
+\usepackage{amssymb}
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}%
+\usepackage{enumitem}
+\usepackage{multicol}
+\usepackage{indentfirst}
+\setcounter{MaxMatrixCols}{30}
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Z}{\mathbb{Z}}
 \begin{document}
+\title{Projekt MOW - Dokumentacja końcowa}
+\author{Maciej Poćwierz\\
+Piotr Chmielewski\\
+Jacek Bylina
+}
+\date{\today}
 \maketitle
 
-\SweaveOpts{concordance=TRUE}
 
+\section{Szczegółowa interpretacja tematu projektu}
+
+\subsection{Naiwny klasyfikator bayesowski}
+
+
+Zbiór danych podzielono na zbiór trenujący składający się z  80\% przykładów i testowy złożony z 20\% przykładów. Przy podziale zachowano procentowy rozkład klas przykładów. Wyliczanie prawdopodobieństw a-posteriori w regule Bayesa wymagało przekształcenie wielu atrybutów binarnych opisujących tę samą cechę przykładu na pojedynczy atrybut dyskretny. Zestaw atrybutów binarnych Wilderness\_Area\_*, zamieniono na atrybut dyskretny przyjmujący wartości ze zbioru \{1, 2, 3\}. Podobnie zestaw atrybutów binarnych opisujący typ gleby przekształcono w pojedynczy atrybut o przciwdziedzinie \{1, 2, \ldots{} , 40\}. Naiwny klasyfikator Bayesa estymuje prawdopodobieństwo $P(x_j|C_i)$ dla atrybutów ciągłych funkcją gęstości zgodnie z przyjętym rozkładem wartości atrybutów. W ramach projektu estymowano to prawdopodobieństwo funkcją gęstości Gauss'a oraz Laplace'a otrzymując bardzo zbliżoną skuteczność klasyfikacji. Jakość klasyfikacji na wydzielonym zbiorze testowym wyniosła ok. 66\%. 
+
+
+
+\subsection{Klasyfikator K najbliższych sąsiadów}
+
+Pierwszym krokiem konstruowania klasyfikatora kNN był podział zbioru trenującego na osobne zbiory uczący i testowy, mając na uwadze, aby podział ten nie zaburzył częstości występowania poszczególnych klas w obu zbiorach.
+Następnie, usunięto z obu zbiorów kolumny reprezentujące atrybuty dyskretne, tzn. kolumny Soil\_Type\_* oraz Wilderness\_*.
+Zaobserwowano, że jakość tak konstruowanego klasyfikatora jest największa dla parametru k=1.
+
+\begin{center}
+\begin{tabular}{ | p{1.5cm} |  p{1.5cm} | p{1.5cm}| p{1.5cm} |  p{1.5cm} |} 
+\hline
+k & 1 & 2 & 3 & 4 \\ 
+\hline
+quality & 84,0\% & 80,8\% & 81,5\% & 79,8\% \\ 
+\hline
+\end{tabular}
+\end{center}
+
+Pierwszym z wypróbowanych usprawnień była normalizacja zbioru danych. Wbrew przypuszczeniom, zastosowanie tego zabiegu nie przyniosła poprawy jakości klasyfikacji.
+
+\begin{center}
+\begin{tabular}{ | p{1.5cm} |  p{1.5cm} | p{1.5cm}| p{1.5cm} |  p{1.5cm} |} 
+\hline
+k & 1 & 2 & 3 & 4 \\ 
+\hline
+quality & 76,1\% & 72,8\% & 74,4\% & 73,4\% \\ 
+\hline
+\end{tabular}
+\end{center}
+
+Aby zrozumieć takie zachowanie klasyfikatora trzeba uwzględnić fakt, że jeśli dane nie są znormalizowane, to atrybuty o bardziej zróżnicowanych wartościach będą miały większy wpływ na wynik klasyfikacji, niż atrybuty o wartościach zbliżonych. Przykładowo dla analizowanych danych, atrybut Elevation o wartościach z zakresu 5000 - 12000, będzie miał większy wpływ na wynik klasyfikacji niż atrybut Slope o wartościach z zakresu 0 - 60, bez względu na to który z nich mocniej koreluje ze zmienną zależną.
+Klasyfikator działał lepiej przed normalizacją, ponieważ w analizowanym zbiorze, atrybuty o dużym rozrzucie wartości wykazują dużą korelację ze zmienną zależną.
+Mając powyższe na uwadze, podjęto próbę poprawy jakości klasyfikacji, poprzez przemnażanie wartości odpowiednich atrybutów przez odpowiednie wagi. Jako wartości wag wykorzystano wartości indeksu Giniego, obliczone za pomocą funkcji randomForest.
+
+\begin{center}
+\begin{tabular}{ | p{7cm} |  p{4cm} |} 
+\hline
+
+ & MeanDecreaseGini \\ \hline
+Elevation & 1733.583623 \\ \hline
+Aspect & 268.802532 \\ \hline
+Slope & 192.8704514 \\ \hline
+Horizontal\_Distance\_To\_Hydrology & 383.3969571 \\ \hline
+Vertical\_Distance\_To\_Hydrology & 301.9205956 \\ \hline
+Horizontal\_Distance\_To\_Roadways & 588.8973193 \\ \hline
+Hillshade\_9am & 302.8200518 \\ \hline
+Hillshade\_Noon & 245.6645633 \\ \hline
+Hillshade\_3pm & 257.5732369 \\ \hline
+Horizontal\_Distance\_To\_Fire\_Points & 425.5022385 \\ \hline
+\end{tabular}
+\end{center}
+
+
+
+Udało się w ten sposób uzyskać pewną poprawę wyników, jednak nie uzyskano wyników lepszych niż przed normalizacją.
+\begin{center}
+\begin{tabular}{ | p{1.5cm} |  p{1.5cm} | p{1.5cm}| p{1.5cm} |  p{1.5cm} |} 
+\hline
+k & 1 & 2 & 3 & 4 \\ 
+\hline
+quality & 83,0\% & 80,0\% & 81,7\% & 80,7\% \\ 
+\hline
+\end{tabular}
+\end{center}
+
+\SweaveOpts{concordance=TRUE}
 <<>>=
 print.noquote("test");
 print.noquote("lol")
@@ -20,5 +135,8 @@ print.noquote("lol")
  p <- qplot(x)
  print(p)
 @
+
+
+
 
 \end{document}
