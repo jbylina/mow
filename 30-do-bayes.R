@@ -38,12 +38,16 @@ e1071_fit <- train(select(data, -Cover_Type),
                    trControl = trControl,
                    tuneGrid = expand.grid(.laplace = laplace))
 
+save(e1071_fit, file = "e1071_fit.Rdata")
+
 # klaR train
 klar_fit <- train(select(data, -Cover_Type),
                   data$Cover_Type,
                   method = 'nb',
                   trControl = trControl,
                   tuneGrid =  expand.grid(.fL = laplace, .usekernel = c(TRUE, FALSE), .adjust = 1))
+
+save(klar_fit, file = "klar_fit.Rdata")
 
 # transform binary cols to one factor
 data %>% select(starts_with('Soil_Type')) %>%
@@ -61,5 +65,6 @@ e1071_fit_2 <- train(select(data_bayes, -Cover_Type),
                      data_bayes$Cover_Type,
                      method = e1071_nb,
                      trControl = trControl,
-                     tuneGrid = expand.grid(.laplace = 0.5))
+                     tuneGrid = expand.grid(.laplace = laplace))
 
+save(e1071_fit_2, file = "e1071_fit_2.Rdata")
