@@ -50,6 +50,27 @@ Jacek Bylina
 \date{\today}
 \maketitle
 
+<<echo = F>>=
+require(caret)
+require(ggplot2)
+require(dplyr)
+plot_conf_matrix <- function(fit){
+  tab <- confusionMatrix(fit)
+  tab <- tab$table/colSums(tab$table)
+  
+  confusion <- as.data.frame(tab)
+  
+  plot <- ggplot(confusion) +
+    geom_tile(aes(x=Reference, y=Prediction, fill=Freq)) +
+    geom_text(aes(x=Reference, y=Prediction, label = round(Freq, 2))) +
+    scale_x_discrete(name="Actual Class") +
+    scale_y_discrete(name="Predicted Class")+
+    scale_fill_gradient(breaks=seq(from=0, to=1, by=.2)) +
+    labs(fill="Normalized\nFrequency") +
+    theme(legend.text=element_text(size=15), legend.position="bottom", legend.key.width=unit(1.5,"cm"))
+  print(plot)
+}
+@
 
 \section{Szczegółowa interpretacja tematu projektu}
 
@@ -62,7 +83,12 @@ Zbiór danych podzielono na zbiór trenujący składający się z  80\% przykła
 
 
 \subsection{Klasyfikator K najbliższych sąsiadów}
-
+<<echo = F>>=
+load("knn_selected_fit.Rdata")
+load("knn_raw_fit.Rdata")
+load("knn_range_fit.Rdata")
+load("knn_normalize_fit.Rdata")
+@
 Pierwszym krokiem konstruowania klasyfikatora kNN był podział zbioru trenującego na osobne zbiory uczący i testowy, mając na uwadze, aby podział ten nie zaburzył częstości występowania poszczególnych klas w obu zbiorach.
 Następnie, usunięto z obu zbiorów kolumny reprezentujące atrybuty dyskretne, tzn. kolumny Soil\_Type\_* oraz Wilderness\_*.
 Zaobserwowano, że jakość tak konstruowanego klasyfikatora jest największa dla parametru k=1.
@@ -125,16 +151,158 @@ quality & 83,0\% & 80,0\% & 81,7\% & 80,7\% \\
 \end{center}
 
 
-<<>>=
-load(file = "rf_model.Rdata")
+
+Knn \\
+
+<<fig = T, echo = F>>=
+knn_selected_fit$results$model <- 'selected' 
+knn_raw_fit$results$model <- 'raw' 
+knn_range_fit$results$model <- 'range' 
+knn_normalize_fit$results$model <- 'scale' 
+
+results <- union(knn_selected_fit$results, knn_raw_fit$results)
+results <- union(results, knn_range_fit$results)
+results <- union(results, knn_normalize_fit$results)
+
+results$model <- as.factor(results$model)
+res_plot <- ggplot(data = results,
+                 aes(x=k, y=Accuracy, group= model, colour= model)) +
+            geom_line() +
+            theme(legend.text=element_text(size=15),
+                  legend.position="bottom") +
+            scale_x_continuous(breaks = seq(min(results$k), max(results$k), by = 1)) +
+            geom_point()
+print(res_plot)
+@
+
+
+<<fig = T, echo = F>>=
+plot_conf_matrix(knn_raw_fit)
+@
+
+
+C50
+<<echo = F>>=
+
+# C50 load
+require(ggplot2)
+require(caret)
+load("rpart_fit.Rdata")
+@
+
+
+<<fig = T, echo = F>>=
+
+# C50 confusion matrix
+plot_conf_matrix(rpart_fit)
+@
+
+
+<<fig = T, echo = F>>=
+
+# C50 parameters modification
+res_plot <- ggplot(rpart_fit) +
+  theme(legend.text=element_text(size=15),
+        legend.position="bottom")
+print(res_plot)
+@
+
+
+
+Random Forest
+<<echo = F>>=
+
+# Random Forest load
+require(randomForest)
+require(ggplot2)
+load("rf_fit.Rdata")
+load("rf_var_importance.Rdata")
+@
+
+
+<<fig = T, echo = F>>=
+
+# Random Forest confusion matrix
+plot_conf_matrix(rf_fit)
+@
+
+
+<<fig = T, echo = F>>=
+
+# Random Forest parameters modification
+plot(rf_fit)
+@
+
+
+<<fig = T, echo = F>>=
+
+# Random Forest - final model error rate by classes
+layout(matrix(c(1,2),nrow=1),width=c(4,1)) 
+par(mar=c(5,4,4,0)) #No margin on the right side
+plot(rf_fit$finalModel, col=1:8, main = "Final model", log="y")
+par(mar=c(5,0,4,2)) #No margin on the left side
+plot(c(0,1),type="n", axes=F, xlab="", ylab="")
+legend("top", colnames(rf_fit$finalModel$err.rate),col=1:8,cex=0.8,fill=1:8)
 @
 
 <<fig = T, echo = F>>=
 
- 
+# Random Forest - var importance
+varImpPlot(rf_var_importance, type = 1, n.var = 20)
 @
 
 
+<<fig = T, echo = F>>=
+
+# Random Forest - var importance
+varImpPlot(rf_var_importance, type = 2, n.var = 20)
+@
+
+
+Bayes \\
+<<echo = F>>=
+
+# Bayes load
+require(dplyr)
+require(ggplot2)
+load("e1071_fit.Rdata")
+load("e1071_fit_2.Rdata")
+load("klar_fit.Rdata")
+@
+
+
+
+<<fig = T, echo = F>>=
+
+# Bayes confusion matrix
+plot_conf_matrix(klar_fit)
+@
+
+<<fig = T, echo = F>>=
+
+# Bayes compare models
+e1071_fit$results$model <- 'e1071_fit'
+e1071_fit$results$usekernel <- FALSE
+e1071_fit_2$results$model <- 'e1071_fit_2'
+e1071_fit_2$results$usekernel <- FALSE
+
+klar_fit$results$model <- paste('klar_fit', 'usekernel', klar_fit$results$usekernel)
+names(klar_fit$results)[names(klar_fit$results)=="fL"] <- "laplace"
+
+
+union_fit <- union(e1071_fit$results, e1071_fit_2$results)
+union_fit <- bind_rows(union_fit, klar_fit$results)
+union_fit$model <- as.factor(union_fit$model)
+
+bayes_plot <- ggplot(data = union_fit, aes(x=laplace, y=Accuracy, group= model, colour= model)) +
+  geom_line() +
+  theme(legend.text=element_text(size=10),
+        legend.position="bottom") +
+  scale_x_continuous(breaks = seq(min(union_fit$laplace), max(union_fit$laplace), by = 0.5)) +
+  geom_point()
+
+print(bayes_plot)
+@
 
 
 \end{document}

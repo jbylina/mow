@@ -64,3 +64,41 @@ knn_selected_fit <- suppressWarnings(train(Cover_Type ~ Elevation + Aspect + Slo
 
 print.noquote("knn_selected_fit - finished")
 save(knn_selected_fit, file = "knn_selected_fit.Rdata")
+
+
+
+require(ggplot2)
+require(caret)
+require(reshape2)
+
+load("knn_selected_fit.Rdata")
+load("knn_raw_fit.Rdata")
+load("knn_range_fit.Rdata")
+load("knn_normalize_fit.Rdata")
+
+
+plot_conf_matrix(knn_selected_fit)
+
+knn_selected_fit$results$model <- 'selected' 
+knn_raw_fit$results$model <- 'raw' 
+knn_range_fit$results$model <- 'range' 
+knn_normalize_fit$results$model <- 'scale' 
+
+results <- union(knn_selected_fit$results, knn_raw_fit$results)
+results <- union(results, knn_range_fit$results)
+results <- union(results, knn_normalize_fit$results)
+
+results$model <- as.factor(results$model)
+res_plot <- ggplot(data = results, aes(x=k, y=Accuracy, group= model, colour= model)) +
+  geom_line() +
+  theme(legend.text=element_text(size=15)) +
+  scale_x_continuous(breaks = seq(min(results$k), max(results$k), by = 1)) +
+  geom_point()
+
+print(res_plot)
+
+
+
+
+
+

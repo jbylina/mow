@@ -68,3 +68,42 @@ e1071_fit_2 <- train(select(data_bayes, -Cover_Type),
                      tuneGrid = expand.grid(.laplace = laplace))
 
 save(e1071_fit_2, file = "e1071_fit_2.Rdata")
+
+
+
+
+require(ggplot2)
+require(dplyr)
+
+load("e1071_fit.Rdata")
+load("e1071_fit_2.Rdata")
+load("klar_fit.Rdata")
+
+plot_conf_matrix(e1071_fit)
+plot_conf_matrix(e1071_fit_2)
+plot_conf_matrix(klar_fit)
+
+e1071_fit$results$model <- 'e1071_fit'
+e1071_fit$results$usekernel <- FALSE
+e1071_fit_2$results$model <- 'e1071_fit_2'
+e1071_fit_2$results$usekernel <- FALSE
+
+klar_fit$results$model <- paste('klar_fit', 'usekernel', klar_fit$results$usekernel)
+names(klar_fit$results)[names(klar_fit$results)=="fL"] <- "laplace"
+
+
+union_fit <- union(e1071_fit$results, e1071_fit_2$results)
+union_fit <- bind_rows(union_fit, klar_fit$results)
+union_fit$model <- as.factor(union_fit$model)
+
+bayes_plot <- ggplot(data = union_fit, aes(x=laplace, y=Accuracy, group= model, colour= model)) +
+  geom_line() +
+  theme(legend.text=element_text(size=9),
+        legend.position="bottom") +
+  scale_x_continuous(breaks = seq(min(union_fit$laplace), max(union_fit$laplace), by = 0.5)) +
+  geom_point()
+
+print(bayes_plot)
+
+
+

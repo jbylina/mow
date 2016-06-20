@@ -89,3 +89,33 @@ rf_var_importance <- randomForest(select(data, -Cover_Type),
 save(rf_var_importance, file = "rf_var_importance.Rdata")
 
 
+
+
+require(randomForest)
+require(ggplot2)
+
+load("rf_fit.Rdata")
+load("rf_var_importance.Rdata")
+
+plot_conf_matrix(rf_fit)
+
+
+plot(rf_fit)
+
+layout(matrix(c(1,2),nrow=1),width=c(4,1)) 
+par(mar=c(5,4,4,0)) #No margin on the right side
+plot(rf_fit$finalModel, col=1:8, main = "Final model", log="y")
+par(mar=c(5,0,4,2)) #No margin on the left side
+plot(c(0,1),type="n", axes=F, xlab="", ylab="")
+legend("top", colnames(rf_fit$finalModel$err.rate),col=1:8,cex=0.8,fill=1:8)
+
+
+varImpPlot(rf_var_importance, type = 2, n.var = 20)
+
+
+varImpPlot(rf_var_importance, type = 1, n.var = 20)
+
+
+
+
+
