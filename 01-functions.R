@@ -17,3 +17,4 @@ plot_conf_matrix <- function(fit){
     theme(legend.text=element_text(size=15), legend.position="bottom", legend.key.width=unit(1.5,"cm"))
   print(plot)
 }
+
