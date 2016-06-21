@@ -2,6 +2,9 @@ require(caret)
 require(klaR)
 require(e1071)
 require(dplyr)
+require(FSelector)
+require(corrplot)
+require(plyr)
 
 e1071_nb  <- list(label = "Naive Bayes e1071",
                   library = "e1071",
@@ -69,11 +72,7 @@ e1071_fit_2 <- train(select(data_bayes, -Cover_Type),
 
 save(e1071_fit_2, file = "e1071_fit_2.Rdata")
 
-
-
-
 require(ggplot2)
-require(dplyr)
 
 load("e1071_fit.Rdata")
 load("e1071_fit_2.Rdata")
@@ -105,5 +104,74 @@ bayes_plot <- ggplot(data = union_fit, aes(x=laplace, y=Accuracy, group= model, 
 
 print(bayes_plot)
 
+# klar po agregacji atrybutow binarnych
+klar_fit_2 <- train(select(data_bayes, -Cover_Type),
+                    data$Cover_Type,
+                    method = 'nb',
+                    trControl = trControl,
+                    tuneGrid =  expand.grid(.fL = laplace, .usekernel = c(TRUE, FALSE), .adjust = 1))
 
+save(klar_fit_2, file = "klar_fit_2.Rdata")
 
+# najlepszy podzbior atrybutow wedlug cfs
+subset <- cfs(Cover_Type~., data)
+f <- as.simple.formula(subset, "Cover_Type")
+print(f)
+data %>% select(c(Elevation, Wilderness_Area4, Cover_Type)) -> data_cfs
+klar_fit_cfs <- train(select(data_cfs, -Cover_Type),
+                      data$Cover_Type,
+                      method = 'nb',
+                      trControl = trControl,
+                      tuneGrid =  expand.grid(.fL = laplace, .usekernel = c(TRUE, FALSE), .adjust = 1))
+
+save(klar_fit_cfs, file = "klar_fit_cfs.Rdata")
+
+# selekcja atrybutow na podstawie information gain
+weights <- information.gain(Cover_Type~., data)
+print(weights)
+sub_ig <- cutoff.k(weights, 50)
+f_ig <- as.simple.formula(sub_ig, "Cover_Type")
+print(f_ig)
+data_ig <- model.frame(f_ig, data)
+klar_fit_ig <- train(select(data_ig, -Cover_Type),
+                     data$Cover_Type,
+                     method = 'nb',
+                     trControl = trControl,
+                     tuneGrid =  expand.grid(.fL = laplace, .usekernel = c(TRUE, FALSE), .adjust = 1))
+
+# selekcja na podstawie korelacji wzajemnej
+data %>% select(-starts_with('Soil_Type'), -starts_with('Wilderness_Area')) -> d
+data_scale <- scale(select(d, -Cover_Type), center=TRUE, scale=TRUE)
+cor_mtx <- cor(data_scale)
+corrplot(cor_mtx, method="circle")
+data %>% select(-Hillshade_3pm, -Horizontal_Distance_To_Hydrology, -Horizontal_Distance_To_Roadways, -Hillshade_9am) -> data_cor
+klar_fit_cor <- train(select(data_cor, -Cover_Type),
+                      data$Cover_Type,
+                      method = 'nb',
+                      trControl = trControl,
+                      tuneGrid =  expand.grid(.fL = laplace, .usekernel = c(TRUE, FALSE), .adjust = 1))
+
+#==========================================================================================================================
+
+read.csv(file = 'data/test.csv', header = TRUE) %>%
+  mutate_each(funs(ifelse(.==1, "Yes", "No")), starts_with('Soil_Type')) %>%
+  mutate_each(funs(as.factor), starts_with('Soil_Type')) %>%
+  mutate_each(funs(addMissingFactorLevels), starts_with('Soil_Type')) %>%
+  
+  mutate_each(funs(ifelse(.==1, "Yes", "No")), starts_with('Wilderness')) %>%
+  mutate_each(funs(as.factor), starts_with('Wilderness')) %>%
+  mutate_each(funs(addMissingFactorLevels), starts_with('Wilderness')) -> test_data
+
+load("klar_fit.Rdata")
+
+start.time <- Sys.time()
+klar_fit_pred <- predict(klar_fit$finalModel, newdata = select(test_data, -Id))
+end.time <- Sys.time()
+cat(sprintf("Time elapsed %f", end.time - start.time))
+
+ids <- select(test_data, Id)
+ids['Cover_Type'] <- as.numeric(klar_fit_pred$class)
+write.csv(ids, file = 'kaggle/klar_fit.csv', row.names = FALSE)
+
+start.time
+end.time
